@@ -617,8 +617,23 @@ export default {
 
             const newFiles = [...files.value];
             if (index >= 0 && index < newFiles.length) {
-                // Update the file name
-                newFiles[index].name = newName;
+                const originalFile = newFiles[index];
+
+                // Create a new File object with the new name
+                // File objects have a read-only name property, so we need to create a new one
+                const newFile = new File([originalFile], newName, {
+                    type: originalFile.type,
+                    lastModified: originalFile.lastModified,
+                });
+
+                // Copy over custom properties that were added during upload
+                if (originalFile.id) newFile.id = originalFile.id;
+                if (originalFile.mimeType) newFile.mimeType = originalFile.mimeType;
+                if (originalFile.base64) newFile.base64 = originalFile.base64;
+                if (originalFile.binary) newFile.binary = originalFile.binary;
+
+                // Replace the file in the array
+                newFiles[index] = newFile;
 
                 // Update the status key if it exists
                 if (status.value?.[oldName]) {
