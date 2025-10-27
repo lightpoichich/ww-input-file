@@ -654,6 +654,9 @@ export default {
                 /* wwEditor:end */
 
                 // Emit filename change event
+                // Note: We don't emit the general 'change' event here because renaming
+                // is different from adding/removing files. Users should use the
+                // 'filenameChange' event specifically for rename workflows.
                 emit('trigger-event', {
                     name: 'filenameChange',
                     event: {
@@ -661,12 +664,6 @@ export default {
                         newName,
                         fileIndex: index,
                     },
-                });
-
-                // Emit general change event
-                emit('trigger-event', {
-                    name: 'change',
-                    event: { value: newFiles },
                 });
             }
         };
