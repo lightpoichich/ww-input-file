@@ -29,6 +29,7 @@ A feature-rich file upload component with drag-and-drop support, file validation
 ***Properties:***
 -   `type`: `'single' | 'multi'` - Sets the upload mode to single or multiple files. Default: `'single'`
 -   `reorder`: `boolean` - Allows reordering of files in multi-file mode. Default: `false`
+-   `editableFilenames`: `boolean` - Allows users to edit filenames after upload by clicking on them. Default: `false`
 -   `drop`: `boolean` - Enables drag and drop functionality. Default: `true`
 -   `maxFileSize`: `number` - Maximum file size in MB. Default: `10`
 -   `minFileSize`: `number` - Minimum file size in MB. Default: `0`
@@ -114,6 +115,7 @@ A feature-rich file upload component with drag-and-drop support, file validation
 -   `change`: Triggered when files are added or removed. Payload: {value: fileArray}
 -   `initValueChange`: Triggered when initial value changes. Payload: {value: fileArray}
 -   `error`: Triggered when file validation fails. Payload: {code: errorCode, data: errorData}
+-   `filenameChange`: Triggered when a filename is edited. Payload: {oldName: string, newName: string, fileIndex: number}
 
 ***Exposed Element Actions:***
 -   `clearFiles`: Clears all files from the component

@@ -15,7 +15,26 @@
             }"
         ></div>
         <div class="ww-file-item__info">
-            <div class="ww-file-item__name" :style="fileNameStyles">{{ file.name }}</div>
+            <div class="ww-file-item__name" :style="fileNameStyles">
+                <input
+                    v-if="isEditing && editableFilenames"
+                    ref="filenameInput"
+                    v-model="editedFilename"
+                    type="text"
+                    class="ww-file-item__name-input"
+                    :style="fileNameInputStyles"
+                    @blur="saveFilename"
+                    @keydown.enter="saveFilename"
+                    @keydown.esc="cancelEdit"
+                />
+                <span
+                    v-else
+                    :class="{ 'ww-file-item__name-editable': editableFilenames && !isReadonly && !isDisabled }"
+                    @click="startEdit"
+                >
+                    {{ displayFilename }}
+                </span>
+            </div>
             <div class="ww-file-item__details" :style="fileDetailsStyles" v-if="showFileInfo">
                 <span>{{ formattedSize }}</span>
                 <span v-if="status && status.uploadProgress !== undefined">
@@ -40,7 +59,7 @@
 </template>
 
 <script>
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref, nextTick } from 'vue';
 
 export default {
     props: {
@@ -65,8 +84,8 @@ export default {
             default: false,
         },
     },
-    emits: ['remove'],
-    setup(props) {
+    emits: ['remove', 'rename'],
+    setup(props, { emit }) {
         const fileUpload = inject('_wwFileUpload', {
             files: computed(() => []),
             content: computed(() => ({})),
@@ -79,6 +98,13 @@ export default {
         const filesCount = computed(() => fileUpload.files.value.length);
         const content = computed(() => fileUpload.content?.value || {});
         const showFileInfo = computed(() => content.value?.showFileInfo);
+        const editableFilenames = computed(() => content.value?.editableFilenames || false);
+
+        // Filename editing state
+        const isEditing = ref(false);
+        const editedFilename = ref(props.file?.name || '');
+        const filenameInput = ref(null);
+        const displayFilename = computed(() => props.file?.name || '');
 
         const fileItemStyles = computed(() => ({
             backgroundColor: content.value?.fileItemBackground || '#fff',
@@ -135,6 +161,62 @@ export default {
             }
         });
 
+        // Filename editing methods
+        const startEdit = () => {
+            if (!editableFilenames.value || props.isReadonly || props.isDisabled) return;
+
+            isEditing.value = true;
+            editedFilename.value = props.file?.name || '';
+
+            nextTick(() => {
+                if (filenameInput.value) {
+                    filenameInput.value.focus();
+                    // Select filename without extension
+                    const lastDotIndex = editedFilename.value.lastIndexOf('.');
+                    if (lastDotIndex > 0) {
+                        filenameInput.value.setSelectionRange(0, lastDotIndex);
+                    } else {
+                        filenameInput.value.select();
+                    }
+                }
+            });
+        };
+
+        const saveFilename = () => {
+            if (!isEditing.value) return;
+
+            const newFilename = editedFilename.value?.trim();
+            const oldFilename = props.file?.name || '';
+
+            if (newFilename && newFilename !== oldFilename) {
+                emit('rename', {
+                    index: props.index,
+                    oldName: oldFilename,
+                    newName: newFilename,
+                });
+            }
+
+            isEditing.value = false;
+        };
+
+        const cancelEdit = () => {
+            editedFilename.value = props.file?.name || '';
+            isEditing.value = false;
+        };
+
+        const fileNameInputStyles = computed(() => ({
+            fontFamily: content.value?.fileNameFontFamily || 'inherit',
+            fontSize: content.value?.fileNameFontSize || '14px',
+            fontWeight: content.value?.fileNameFontWeight || 500,
+            color: content.value?.fileNameColor || 'inherit',
+            backgroundColor: content.value?.fileItemBackground || '#fff',
+            border: `1px solid ${content.value?.fileItemBorderColor || '#eee'}`,
+            borderRadius: '4px',
+            padding: '2px 4px',
+            width: '100%',
+            outline: 'none',
+        }));
+
         return {
             formattedSize,
             filesCount,
@@ -145,6 +227,15 @@ export default {
             content,
             showFileInfo,
             removeIcon,
+            editableFilenames,
+            isEditing,
+            editedFilename,
+            filenameInput,
+            displayFilename,
+            startEdit,
+            saveFilename,
+            cancelEdit,
+            fileNameInputStyles,
         };
     },
 };
@@ -205,6 +296,37 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         color: v-bind('content?.fileNameColor || "inherit"');
+
+        &-editable {
+            cursor: text;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.03);
+            }
+        }
+
+        &-input {
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+            width: 100%;
+            min-width: 0;
+            padding: 2px 4px;
+            border: 1px solid;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s ease;
+
+            &:focus {
+                border-color: v-bind('content?.progressBarColor || "#4CAF50"');
+                box-shadow: 0 0 0 2px
+                    v-bind('content?.progressBarColor ? content.progressBarColor + "33" : "rgba(76, 175, 80, 0.2)"');
+            }
+        }
     }
 
     &__details {

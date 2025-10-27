@@ -9,6 +9,7 @@ export default {
             [
                 'type',
                 'reorder',
+                'editableFilenames',
                 'drop',
                 'maxFileSize',
                 'minFileSize',
@@ -164,6 +165,15 @@ export default {
                 data: { message: 'File validation failed' },
             },
         },
+        {
+            name: 'filenameChange',
+            label: { en: 'On filename change' },
+            event: {
+                oldName: 'old_filename.jpg',
+                newName: 'new_filename.jpg',
+                fileIndex: 0,
+            },
+        },
     ],
     actions: [
         {
@@ -190,6 +200,33 @@ export default {
                 type: 'string',
                 enum: ['single', 'multi'],
                 tooltip: 'A string that defines the upload type: `"single" | "multi"`',
+            },
+            /* wwEditor:end */
+        },
+        reorder: {
+            label: { en: 'Allow reordering' },
+            type: 'OnOff',
+            section: 'settings',
+            defaultValue: false,
+            hidden: content => content?.type !== 'multi',
+            bindable: true,
+            /* wwEditor:start */
+            bindingValidation: {
+                type: 'boolean',
+                tooltip: 'A boolean that defines if reordering is enabled: `true | false`',
+            },
+            /* wwEditor:end */
+        },
+        editableFilenames: {
+            label: { en: 'Allow filename editing' },
+            type: 'OnOff',
+            section: 'settings',
+            defaultValue: false,
+            bindable: true,
+            /* wwEditor:start */
+            bindingValidation: {
+                type: 'boolean',
+                tooltip: 'A boolean that defines if filenames can be edited after upload: `true | false`',
             },
             /* wwEditor:end */
         },

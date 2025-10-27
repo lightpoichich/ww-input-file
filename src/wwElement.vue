@@ -62,6 +62,7 @@
             :is-disabled="isDisabled"
             @remove="removeFile"
             @reorder="reorderFiles"
+            @rename="renameFile"
         />
 
         <!-- Hidden file input -->
@@ -607,6 +608,42 @@ export default {
             });
         };
 
+        const renameFile = ({ index, oldName, newName }) => {
+            if (isDisabled.value || isReadonly.value) return;
+
+            const newFiles = [...files.value];
+            if (index >= 0 && index < newFiles.length) {
+                // Update the file name
+                newFiles[index].name = newName;
+
+                // Update the status key if it exists
+                if (status.value?.[oldName]) {
+                    const updatedStatus = { ...status.value };
+                    updatedStatus[newName] = updatedStatus[oldName];
+                    delete updatedStatus[oldName];
+                    setStatus(updatedStatus);
+                }
+
+                setFiles(newFiles);
+
+                // Emit filename change event
+                emit('trigger-event', {
+                    name: 'filenameChange',
+                    event: {
+                        oldName,
+                        newName,
+                        fileIndex: index,
+                    },
+                });
+
+                // Emit general change event
+                emit('trigger-event', {
+                    name: 'change',
+                    event: { value: newFiles },
+                });
+            }
+        };
+
         const clearFiles = () => {
             setFiles([]);
         };
@@ -691,6 +728,7 @@ export default {
             handleFileSelection,
             removeFile,
             reorderFiles,
+            renameFile,
             getAllowedTypesLabel,
             iconHTML,
             uploadIconPosition,

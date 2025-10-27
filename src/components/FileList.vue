@@ -10,6 +10,7 @@
                 :is-readonly="isReadonly"
                 :is-disabled="isDisabled"
                 @remove="$emit('remove', index)"
+                @rename="$emit('rename', $event)"
             />
         </transition-group>
     </div>
@@ -46,7 +47,7 @@ export default {
             default: false,
         },
     },
-    emits: ['remove'],
+    emits: ['remove', 'rename'],
     setup(props) {
         const getFileStatus = file => {
             if (!file?.name || !props.status) return {};
