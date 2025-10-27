@@ -33,6 +33,11 @@
                     @click="startEdit"
                 >
                     {{ displayFilename }}
+                    <span
+                        v-if="editableFilenames && !isReadonly && !isDisabled"
+                        class="ww-file-item__edit-icon"
+                        v-html="editIcon"
+                    ></span>
                 </span>
             </div>
             <div class="ww-file-item__details" :style="fileDetailsStyles" v-if="showFileInfo">
@@ -152,12 +157,20 @@ export default {
 
         const { getIcon } = wwLib.useIcons();
         const removeIcon = ref(null);
+        const editIcon = ref(null);
 
         onMounted(async () => {
             try {
                 removeIcon.value = await getIcon('lucide/trash');
             } catch (e) {
                 removeIcon.value = null;
+            }
+
+            try {
+                editIcon.value = await getIcon('lucide/pencil');
+            } catch (e) {
+                // Fallback to inline SVG if icon fetch fails
+                editIcon.value = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
             }
         });
 
@@ -243,6 +256,7 @@ export default {
             content,
             showFileInfo,
             removeIcon,
+            editIcon,
             editableFilenames,
             isEditing,
             editedFilename,
@@ -314,13 +328,23 @@ export default {
         color: v-bind('content?.fileNameColor || "inherit"');
 
         &-editable {
-            cursor: text;
-            padding: 2px 4px;
+            cursor: pointer;
+            padding: 2px 6px 2px 4px;
             border-radius: 4px;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid transparent;
 
             &:hover {
-                background-color: rgba(0, 0, 0, 0.03);
+                background-color: rgba(0, 0, 0, 0.04);
+                border-color: v-bind('content?.progressBarColor || "rgba(76, 175, 80, 0.3)"');
+                color: v-bind('content?.progressBarColor || "#4CAF50"');
+
+                .ww-file-item__edit-icon {
+                    opacity: 1;
+                }
             }
         }
 
@@ -342,6 +366,24 @@ export default {
                 box-shadow: 0 0 0 2px
                     v-bind('content?.progressBarColor ? content.progressBarColor + "33" : "rgba(76, 175, 80, 0.2)"');
             }
+        }
+    }
+
+    &__edit-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+        margin-left: 2px;
+
+        :deep(svg) {
+            width: 100%;
+            height: 100%;
+            stroke: currentColor;
         }
     }
 
