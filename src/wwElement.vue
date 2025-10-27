@@ -609,6 +609,10 @@ export default {
         };
 
         const renameFile = ({ index, oldName, newName }) => {
+            /* wwEditor:start */
+            console.log('[wwElement] renameFile called', { index, oldName, newName });
+            /* wwEditor:end */
+
             if (isDisabled.value || isReadonly.value) return;
 
             const newFiles = [...files.value];
@@ -625,6 +629,14 @@ export default {
                 }
 
                 setFiles(newFiles);
+
+                /* wwEditor:start */
+                console.log('[wwElement] Emitting filenameChange trigger event', {
+                    oldName,
+                    newName,
+                    fileIndex: index,
+                });
+                /* wwEditor:end */
 
                 // Emit filename change event
                 emit('trigger-event', {

@@ -188,7 +188,23 @@ export default {
             const newFilename = editedFilename.value?.trim();
             const oldFilename = props.file?.name || '';
 
+            /* wwEditor:start */
+            console.log('[FileItem] saveFilename called', {
+                newFilename,
+                oldFilename,
+                changed: newFilename !== oldFilename,
+                isEmpty: !newFilename,
+            });
+            /* wwEditor:end */
+
             if (newFilename && newFilename !== oldFilename) {
+                /* wwEditor:start */
+                console.log('[FileItem] Emitting rename event', {
+                    index: props.index,
+                    oldName: oldFilename,
+                    newName: newFilename,
+                });
+                /* wwEditor:end */
                 emit('rename', {
                     index: props.index,
                     oldName: oldFilename,
