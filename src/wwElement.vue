@@ -553,14 +553,26 @@ export default {
                         name: 'change',
                         event: { value: processedFiles },
                     });
+                    // Emit documentAdded event for each newly added file
+                    emit('trigger-event', {
+                        name: 'documentAdded',
+                        event: { value: processedFiles },
+                    });
                     isProcessing.value = false;
                 } else {
                     const currentFiles = [...files.value];
                     let newFiles = [...currentFiles];
 
                     const addNextFile = index => {
-                        newFiles = [...newFiles, processedFiles[index]];
+                        const newFile = processedFiles[index];
+                        newFiles = [...newFiles, newFile];
                         setFiles(newFiles);
+
+                        // Emit documentAdded event for each newly added file
+                        emit('trigger-event', {
+                            name: 'documentAdded',
+                            event: { value: [newFile] },
+                        });
 
                         if (index < processedFiles.length - 1) {
                             setTimeout(() => addNextFile(index + 1), 150);

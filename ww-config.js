@@ -174,6 +174,11 @@ export default {
                 fileIndex: 0,
             },
         },
+        {
+            name: 'documentAdded',
+            label: { en: 'On document added' },
+            event: { value: [] },
+        },
     ],
     actions: [
         {
