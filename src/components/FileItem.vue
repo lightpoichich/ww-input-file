@@ -174,6 +174,15 @@ export default {
             }
         });
 
+        // Get file extension helper
+        const getFileExtension = filename => {
+            const lastDotIndex = filename?.lastIndexOf('.');
+            if (lastDotIndex > 0) {
+                return filename.substring(lastDotIndex);
+            }
+            return '';
+        };
+
         // Filename editing methods
         const startEdit = () => {
             if (!editableFilenames.value || props.isReadonly || props.isDisabled) return;
@@ -198,8 +207,9 @@ export default {
         const saveFilename = () => {
             if (!isEditing.value) return;
 
-            const newFilename = editedFilename.value?.trim();
+            let newFilename = editedFilename.value?.trim();
             const oldFilename = props.file?.name || '';
+            const extension = getFileExtension(oldFilename);
 
             /* wwEditor:start */
             console.log('[FileItem] saveFilename called', {
@@ -211,6 +221,11 @@ export default {
             /* wwEditor:end */
 
             if (newFilename && newFilename !== oldFilename) {
+                // Ensure the new filename has the extension
+                if (!newFilename.endsWith(extension)) {
+                    newFilename = newFilename + extension;
+                }
+
                 /* wwEditor:start */
                 console.log('[FileItem] Emitting rename event', {
                     index: props.index,

@@ -620,6 +620,14 @@ export default {
             });
         };
 
+        const getFilenameWithoutExtension = filename => {
+            const lastDotIndex = filename?.lastIndexOf('.');
+            if (lastDotIndex > 0) {
+                return filename.substring(0, lastDotIndex);
+            }
+            return filename;
+        };
+
         const renameFile = ({ index, oldName, newName }) => {
             /* wwEditor:start */
             console.log('[wwElement] renameFile called', { index, oldName, newName });
@@ -665,7 +673,7 @@ export default {
                 });
                 /* wwEditor:end */
 
-                // Emit filename change event
+                // Emit filename change event with newName without extension
                 // Note: We don't emit the general 'change' event here because renaming
                 // is different from adding/removing files. Users should use the
                 // 'filenameChange' event specifically for rename workflows.
@@ -673,7 +681,7 @@ export default {
                     name: 'filenameChange',
                     event: {
                         oldName,
-                        newName,
+                        newName: getFilenameWithoutExtension(newName),
                         fileIndex: index,
                     },
                 });
