@@ -23,10 +23,9 @@
                     type="text"
                     class="ww-file-item__name-input"
                     :style="fileNameInputStyles"
-                    @blur="saveFilename"
-                    @keydown.enter="saveFilename"
+                    @blur="handleInputBlur"
+                    @keydown.enter="handleInputEnter"
                     @keydown.esc="cancelEdit"
-                    @input="sanitizeFilename"
                 />
                 <span
                     v-else
@@ -186,8 +185,9 @@ export default {
 
         // Sanitize filename: replace whitespaces and special characters with underscores
         // Keep accents and letters
-        const sanitizeFilename = () => {
-            let sanitized = editedFilename.value;
+        // Returns sanitized filename without extension
+        const sanitizeFilenameValue = (filename) => {
+            let sanitized = filename;
 
             // Replace whitespaces with underscores
             sanitized = sanitized.replace(/\s+/g, '_');
@@ -202,7 +202,19 @@ export default {
             // Remove leading/trailing underscores
             sanitized = sanitized.replace(/^_+|_+$/g, '');
 
-            editedFilename.value = sanitized;
+            return sanitized;
+        };
+
+        // Handle input blur - sanitize and save
+        const handleInputBlur = () => {
+            editedFilename.value = sanitizeFilenameValue(editedFilename.value);
+            saveFilename();
+        };
+
+        // Handle enter key - sanitize and save
+        const handleInputEnter = () => {
+            editedFilename.value = sanitizeFilenameValue(editedFilename.value);
+            saveFilename();
         };
 
         // Filename editing methods
@@ -303,7 +315,8 @@ export default {
             saveFilename,
             cancelEdit,
             fileNameInputStyles,
-            sanitizeFilename,
+            handleInputBlur,
+            handleInputEnter,
         };
     },
 };
