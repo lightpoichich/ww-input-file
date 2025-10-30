@@ -26,6 +26,7 @@
                     @blur="saveFilename"
                     @keydown.enter="saveFilename"
                     @keydown.esc="cancelEdit"
+                    @input="sanitizeFilename"
                 />
                 <span
                     v-else
@@ -183,6 +184,27 @@ export default {
             return '';
         };
 
+        // Sanitize filename: replace whitespaces and special characters with underscores
+        // Keep accents and letters
+        const sanitizeFilename = () => {
+            let sanitized = editedFilename.value;
+
+            // Replace whitespaces with underscores
+            sanitized = sanitized.replace(/\s+/g, '_');
+
+            // Replace special characters with underscores, but keep letters (with accents), numbers, dots, and hyphens
+            // This regex keeps: letters (with accents like é, à, ñ), numbers, dots, hyphens, and underscores
+            sanitized = sanitized.replace(/[^\w.-]/gu, '_');
+
+            // Replace multiple consecutive underscores with a single underscore
+            sanitized = sanitized.replace(/_+/g, '_');
+
+            // Remove leading/trailing underscores
+            sanitized = sanitized.replace(/^_+|_+$/g, '');
+
+            editedFilename.value = sanitized;
+        };
+
         // Filename editing methods
         const startEdit = () => {
             if (!editableFilenames.value || props.isReadonly || props.isDisabled) return;
@@ -281,6 +303,7 @@ export default {
             saveFilename,
             cancelEdit,
             fileNameInputStyles,
+            sanitizeFilename,
         };
     },
 };
